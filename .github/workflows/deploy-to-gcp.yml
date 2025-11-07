@@ -52,4 +52,4 @@ jobs:
             --cpu 1 \
             --max-instances 10 \
             --timeout 300 \
-            --startup-cpu-boost
+            --cpu-boost
