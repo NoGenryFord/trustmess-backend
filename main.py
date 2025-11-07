@@ -54,40 +54,17 @@ async def broadcast_online_users():
         if user_id in online_users:
             del online_users[user_id]
 
-async def handle_peer_signal(from_user_id: int, message: dict):
-    """
-    Обробка P2P сигналів (offer, answer, ice-candidate)
-    Перенаправлення сигналу від одного користувача до іншого
-    """
-
-    to_user_id = message.get("to")
-    signal_data = message.get("signal")
-    signal_type = message.get("signalType")  # "offer", "answer", "ice-candidate"
-
-    print(f"P2P Signal: {signal_type} from {from_user_id} to {to_user_id}")
-
-    # Перевірити, чи онлайн отримувач
-    if to_user_id in active_connections:
-        target_ws = active_connections[to_user_id]
-        
-        try:
-            await target_ws.send_json({
-                "type": "peer-signal",
-                "from": from_user_id,
-                "fromUsername": online_users.get(from_user_id),
-                "signalType": signal_type,
-                "signal": signal_data
-            })
-            print(f"Signal forwarded successfully to {to_user_id}")
-        except Exception as e:
-            print(f"Failed to forward signal to {to_user_id}: {e}")
-    else:
-        print(f"User {to_user_id} is offline, signal not delivered")
-
 # ? CORS Middleware
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["http://localhost:5173", "http://192.168.88.130:5173", "http://192.168.1.110:5173", "http://172.20.10.2:5173","http://192.168.1.43:5173"],
+    allow_origins=[
+        "http://localhost:5173",
+        "http://192.168.88.130:5173",
+        "http://192.168.1.110:5173",
+        "http://172.20.10.2:5173",
+        "http://192.168.1.43:5173",
+        "https://nogenryford.github.io"
+    ],
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
@@ -200,16 +177,6 @@ async def websocket_endpoint(websocket: WebSocket, user_id: int):
         # wain new messege (support connection)
         while True:
             data = await websocket.receive_text()
-            message = json.loads(data)
-            
-            # Обробка P2P сигналів (offer/answer/ice-candidate)
-            message_type = message.get("type")
-            
-            if message_type == "peer-signal":
-                # Сервер тільки пересилає сигнали, повідомлення йдуть напряму P2P
-                await handle_peer_signal(user_id, message)
-            else:
-                print(f"Unknown message type: {message_type}")
     except WebSocketDisconnect:
         # User disconnect
         print(f"User {user_id} disconnected")
@@ -245,17 +212,6 @@ async def debug_online_users():
             {"id": user_id, "username": username}
             for user_id, username in online_users.items()
         ]
-    }
-
-# ! DEV ROUTE
-@app.get("/dev/p2p_debug", name="Debug P2P Signaling", tags=["dev"])
-async def debug_p2p():
-    """DEV: Інформація про P2P сигналізацію"""
-    return {
-        "status": "debug",
-        "online_users": dict(online_users),
-        "active_connections": len(active_connections),
-        "message": "P2P signaling server ready (messages go direct P2P, not through server)"
     }
 
 # ? Run the app with: uvicorn main:app --reload
