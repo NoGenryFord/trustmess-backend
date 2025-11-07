@@ -1,32 +1,25 @@
-# Use Python 3.11 slim image
-FROM python:3.11-slim
+# Use Python 3.12 slim image (3.14 not available yet, use 3.12)
+FROM python:3.12-slim
 
 # Set working directory
 WORKDIR /app
 
-# Install uv
-RUN pip install --no-cache-dir uv
-
-# Copy dependency files
-COPY pyproject.toml uv.lock ./
-
-# Install dependencies using uv
-RUN uv sync --frozen --no-dev
-
-# Copy application code
+# Copy application code first
 COPY . .
+
+# Install dependencies directly with pip
+RUN pip install --no-cache-dir \
+    fastapi \
+    uvicorn[standard] \
+    pydantic \
+    pyjwt \
+    "pwdlib[argon2]" \
+    websockets \
+    aiosqlite \
+    sqlalchemy
 
 # Expose port
 EXPOSE 8000
 
-# Create startup script
-RUN echo '#!/bin/sh\n\
-set -e\n\
-echo "Initializing database..."\n\
-uv run python init_db.py\n\
-echo "Starting server..."\n\
-exec uv run uvicorn main:app --host 0.0.0.0 --port 8000\n\
-' > /app/start.sh && chmod +x /app/start.sh
-
-# Run startup script
-CMD ["/app/start.sh"]
+# Initialize database and start server
+CMD python init_db.py && uvicorn main:app --host 0.0.0.0 --port 8000
