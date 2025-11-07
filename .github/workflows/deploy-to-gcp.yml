@@ -50,4 +50,6 @@ jobs:
             --port 8000 \
             --memory 512Mi \
             --cpu 1 \
-            --max-instances 10
+            --max-instances 10 \
+            --timeout 300 \
+            --startup-cpu-boost
