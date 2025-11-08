@@ -49,10 +49,8 @@ jobs:
             --allow-unauthenticated \
             --port 8000 \
             --concurrency 1 \
-            --cpu-throttling off \
+            --cpu-always-allocated \
             --memory 512Mi \
             --cpu 1 \
             --max-instances 10 \
-            --timeout 3600 \
-            --cpu-boost \
-            --session-affinity
+            --timeout 3600s \
