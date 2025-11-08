@@ -21,5 +21,5 @@ RUN pip install --no-cache-dir \
 # Expose port
 EXPOSE 8080
 
-# Start server using Python script that reads PORT env variable
-CMD ["uvicorn", "main:app", "--host", "0.0.0.0", "--port", "${PORT:-8080}"]
+# Start server using shell form to allow environment variable substitution
+CMD uvicorn main:app --host 0.0.0.0 --port ${PORT:-8080}

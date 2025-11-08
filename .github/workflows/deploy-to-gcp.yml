@@ -53,3 +53,8 @@ jobs:
             --cpu 1 \
             --max-instances 10 \
             --timeout 3600s \
+            --startup-cpu-boost \
+            --startup-probe-initial-delay-seconds=240 \
+            --startup-probe-period-seconds=10 \
+            --startup-probe-timeout-seconds=5 \
+            --startup-probe-failure-threshold=3
