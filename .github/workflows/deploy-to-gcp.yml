@@ -51,5 +51,7 @@ jobs:
             --memory 512Mi \
             --cpu 1 \
             --max-instances 10 \
-            --timeout 300 \
-            --cpu-boost
+            --timeout 3600 \
+            --cpu-boost \
+            --use-http2 \
+            --session-affinity
