@@ -53,5 +53,4 @@ jobs:
             --max-instances 10 \
             --timeout 3600 \
             --cpu-boost \
-            --use-http2 \
             --session-affinity
