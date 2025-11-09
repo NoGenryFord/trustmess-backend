@@ -15,36 +15,6 @@ def hash_password(password: str) -> str:
 
 app = FastAPI()
 
-# Initialize database on startup
-@app.on_event("startup")
-async def startup_event():
-    """Initialize database when app starts"""
-    import os
-    if not os.path.exists(db_connector.DB_PATH_MAIN):
-        print("Database not found, initializing...")
-        conn = db_connector.get_db_connection(db_connector.DB_PATH_MAIN)
-        db_connector.init_db(conn)
-        
-        # Add test users
-        from src.secure.passhashing import hash_password_def
-        test_users = [
-            ('admin', hash_password_def('admin123'), 1),
-            ('user1', hash_password_def('password1'), 0),
-            ('user2', hash_password_def('password2'), 0),
-        ]
-        for username, password, is_admin in test_users:
-            try:
-                conn.execute(
-                    'INSERT INTO users (username, password, isAdmin) VALUES (?, ?, ?)',
-                    (username, password, is_admin)
-                )
-            except Exception as e:
-                print(f"Could not add user {username}: {e}")
-        conn.commit()
-        print("✅ Database initialized")
-    else:
-        print("Database already exists")
-
 
 '''Integrate Web socked form create list of online users'''
 from typing import Dict
@@ -88,14 +58,7 @@ async def broadcast_online_users():
 # ? CORS Middleware
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=[
-        "http://localhost:5173",
-        "http://192.168.88.130:5173",
-        "http://192.168.1.110:5173",
-        "http://172.20.10.2:5173",
-        "http://192.168.1.43:5173",
-        "https://nogenryford.github.io"
-    ],
+    allow_origins=["*"],
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
@@ -233,7 +196,7 @@ async def read_sqlite_users_with_pass():
 # ! DEV ROUTE
 @app.get("/dev/online_debug", name="Debug Online Users", tags=["dev"])
 async def debug_online_users():
-    """DEV: Детальна інформація про онлайн користувачів"""
+    """DEV: info about online users"""
     return {
         "status": "debug",
         "online_users": dict(online_users),  # {id: username}
@@ -248,4 +211,4 @@ async def debug_online_users():
 # ? Run the app with: uvicorn main:app --reload
 if __name__ == "__main__":
     import uvicorn
-    uvicorn.run('main:app', host='0.0.0.0', port=8080, reload=True)
+    uvicorn.run('main:app', host='0.0.0.0', port=8000, reload=True)

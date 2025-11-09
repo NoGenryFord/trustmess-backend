@@ -1,0 +1,13 @@
+{
+	"folders": [
+		{
+			"name": "final-project-FE",
+			"path": "../../../final-project-FE"
+		},
+		{
+			"name": "BE-server-for-FE-final-project",
+			"path": "../.."
+		}
+	],
+	"settings": {}
+}

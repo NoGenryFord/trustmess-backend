@@ -2,13 +2,18 @@
 import sqlite3
 from sqlite3 import Connection
 import os
+from pathlib import Path
 
-# Use /tmp for the database path, as it's a writable in-memory filesystem in Cloud Run
-DB_PATH_MAIN = '/tmp/db.db'
+# Get the project root directory (parent of src folder)
+PROJECT_ROOT = Path(__file__).parent.parent
+# Database will be created in the project root
+DB_PATH_MAIN = str(PROJECT_ROOT / 'db.db')
 
 def get_db_connection(db_path: str) -> Connection:
     # Ensure the directory exists
-    os.makedirs(os.path.dirname(db_path), exist_ok=True)
+    db_dir = os.path.dirname(db_path)
+    if db_dir:  # Only create directory if there is a directory path
+        os.makedirs(db_dir, exist_ok=True)
     conn = sqlite3.connect(db_path)
     conn.row_factory = sqlite3.Row
     return conn
