@@ -10,11 +10,7 @@ from src.secure.auth_middleware import get_current_user
 from datetime import timedelta
 from fastapi import Depends
 
-def hash_password(password: str) -> str:
-    ...
-
 app = FastAPI()
-
 
 '''Integrate Web socked form create list of online users'''
 from typing import Dict
@@ -144,9 +140,6 @@ async def register(auth_request: AuthRequest):
 async def websocket_endpoint(websocket: WebSocket, user_id: int):
     """
     WebSocket connection for control online status
-    
-    Params:
-    - user_id: ID user from БД
     """
     # Get connection
     await websocket.accept()

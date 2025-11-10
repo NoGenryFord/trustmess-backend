@@ -3,7 +3,7 @@ from datetime import datetime, timedelta
 from typing import Optional
 
 '''Secret key adn other constants'''
-SECRET_KEY = "your-super-secret-key-change-this-in-production-12345"
+SECRET_KEY = "your-super-secret-key-change-this-in-production-12345" # !!! ПОМІНЯТИ НА НОРМЛЬНИЙ КЛЮЧ, ЦЕ ПРИКЛАД НЕ ЗАБУТИ!!!! АААААА ВЗЯТИ З .ENV В ДЕВ ТА З СЕКРЕТУ В ПРОДІ!!!!! 
 ALGORITHM = "HS256"
 ACCESS_TOKEN_EXPIRE_MINUTES = 30
 
