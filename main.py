@@ -81,37 +81,6 @@ async def read_sqlite_users():
     users = db_connector.get_all_users(conn)
     conn.close()
     return [dict(user) for user in users]
-
-
-# * POST /auth/login
-@app.post("/auth/login", name="Authenticate User", tags=["authentication"])
-async def login(auth_request: AuthRequest):
-    conn = db_connector.get_db_connection(db_connector.DB_PATH_MAIN)
-    user = db_connector.check_authentication(conn, auth_request.username)
-    conn.close()
-
-    verify_password = pswhach.verify_hached_password_def(auth_request.password, user['password'])
-
-    if (user and verify_password and user['username'] == auth_request.username):
-        access_token = create_access_token(
-            data={
-                "sub": user['username'],
-                "user_id": user["id"]
-            },
-            expires_delta=timedelta(minutes=ACCESS_TOKEN_EXPIRE_MINUTES)
-        )
-
-        return {
-            "status": "success", 
-            "access_token": access_token,
-            "token_type": "bearer",
-            "user": {
-                "id": user['id'], 
-                "username": user['username']
-                }
-            }
-    else:
-        return {"status": "failure", "message": "Invalid credentials"}
     
 # * POST /auth/register
 @app.post("/auth/register", name="Sign Up User", tags=["authentication"])
