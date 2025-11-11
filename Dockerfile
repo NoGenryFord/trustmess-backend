@@ -15,11 +15,10 @@ RUN pip install --no-cache-dir \
     pyjwt \
     "pwdlib[argon2]" \
     websockets \
-    aiosqlite \
     sqlalchemy
 
 # Expose port
-EXPOSE 8080
+EXPOSE 8000
 
 # Start server using shell form to allow environment variable substitution
-CMD uvicorn main:app --host 0.0.0.0 --port ${PORT:-8080}
+CMD ["uvicorn", "main:app", "--host",  "0.0.0.0", "--port", "8000"]
