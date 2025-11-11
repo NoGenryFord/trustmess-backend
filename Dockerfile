@@ -15,7 +15,9 @@ RUN pip install --no-cache-dir \
     pyjwt \
     "pwdlib[argon2]" \
     websockets \
-    sqlalchemy
+    sqlalchemy \
+    psycopg2-binary \
+    python-dotenv        
 
 # Expose port
 EXPOSE 8000
