@@ -22,16 +22,20 @@ async def websocket_endpoint(websocket: WebSocket, user_id: int):
     
     try:
         # Keep connection alive
-        data = await websocket.receive_text()
-        '''
-        Can handle incoming messages here if needed
-        '''
-        print(f"Received from {user_id}: {data}")
+        while True:
+            data = await websocket.receive_text()
+            '''
+            Can handle incoming messages here if needed
+            '''
+            print(f"Received from {user_id}: {data}")
     except WebSocketDisconnect:
         await manager.disconnect(user_id)
+        await manager.broadcast_online_users()
     except Exception as error:
         print(f"WebSocket error for user {user_id}: {error}")
         await manager.disconnect(user_id)
+        await manager.broadcast_online_users()
+
 
 @router.get("/online")
 async def get_online_user():
