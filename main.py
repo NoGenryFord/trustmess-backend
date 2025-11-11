@@ -60,11 +60,6 @@ app.add_middleware(
     allow_headers=["*"],
 )   
 
-# ? SCHEMAS
-# * AUTH ROUTES
-class AuthRequest(BaseModel):
-    username: str
-    password: str
 
 # ? ROOT ROUTE
 @app.get("/")
@@ -81,29 +76,7 @@ async def read_sqlite_users():
     users = db_connector.get_all_users(conn)
     conn.close()
     return [dict(user) for user in users]
-    
-# * POST /auth/register
-@app.post("/auth/register", name="Sign Up User", tags=["authentication"])
-async def register(auth_request: AuthRequest):
-    conn = db_connector.get_db_connection(db_connector.DB_PATH_MAIN)
 
-    # Check if user exist
-    existing_user = db_connector.get_user_by_username(conn, auth_request.username)
-    if existing_user:
-        conn.close()
-        return {"status": "failure", "message": "User already exists"}
-    
-    hashed_password = pswhach.hash_password_def(auth_request.password)
-    
-    # Create new user
-    new_user = db_connector.create_user(conn, auth_request.username, hashed_password)
-    conn.close()
-
-    if new_user:
-        return {"status": "success", "user": dict(new_user)}
-    else:
-        return {"status": "failure", "message": "Failed to create user"}
-    
 # ? WebSocket endpoints
 @app.websocket("/ws/{user_id}")
 async def websocket_endpoint(websocket: WebSocket, user_id: int):
