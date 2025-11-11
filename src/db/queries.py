@@ -46,7 +46,7 @@ def create_user(username: str, hashed_password: str, isAdmin: bool = False):
     try:
         with conn.cursor() as cursor:
             cursor.execute(
-                'INSERT INTO users (username, password, isAdmin) VALUES (%s, %s, %s) RETURNING id',
+                'INSERT INTO users (username, password, is_admin) VALUES (%s, %s, %s) RETURNING id',
                 (username, hashed_password, isAdmin)
             )
             user_id = cursor.fetchone()['id']

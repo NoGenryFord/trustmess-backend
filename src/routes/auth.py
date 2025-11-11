@@ -16,7 +16,7 @@ async def login(auth_request: AuthRequest):
 
     if not user:
         raise HTTPException(status_code=401, detail='Invalide credenrials')
-    if not hashed_password.verify_hached_password_def(auth_request.password, user['password']):
+    if not hashed_password(auth_request.password, user['password']):
         raise HTTPException(status_code=401, detail='Invalide credenrials')
     
     # Create token for user
@@ -50,7 +50,7 @@ async def register(auth_request: AuthRequest):
         raise HTTPException(status_code=400, detail='User already exist')
     
     # Hash password
-    hashed_password_in_db = hashed_password.hash_password_def(auth_request.password)
+    hashed_password_in_db = hash_password_def(auth_request.password)
     
     # Create new user
     try:
