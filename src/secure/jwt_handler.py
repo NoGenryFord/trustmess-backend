@@ -45,6 +45,20 @@ def verify_token(token: str):
         # Invaled token
         return None
     
+def verify_refresh_token(token: str):
+    '''Check JWT token and return user data'''
+    try:
+        payload = jwt.decode(token, SECRET_KEY, algorithms=[ALGORITHM])
+        if payload.get("type") != "refresh":
+            return None
+        username = payload.get("sub")
+        user_id = payload.get("user_id")
+        if not username or not user_id:
+            return None
+        return {"username": username, "user_id": user_id}
+    except ...:
+        return None
+    
 def create_refresh_token(data: dict):
     """Create refresh token with long life term"""
     to_encode = data.copy()

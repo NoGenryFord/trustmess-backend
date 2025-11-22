@@ -1,8 +1,9 @@
-from fastapi import APIRouter, HTTPException
+from fastapi import APIRouter, HTTPException, Response, Depends, Cookie
 from src.db import queries
 from src.schemas.auth import AuthRequest
 from src.secure.passhashing import hash_password_def, verify_hached_password_def as hashed_password
-from src.secure.jwt_handler import create_access_token, ACCESS_TOKEN_EXPIRE_MINUTES
+from src.secure.jwt_handler import create_access_token, ACCESS_TOKEN_EXPIRE_MINUTES, create_refresh_token, verify_refresh_token
+from src.secure.auth_middleware import get_current_user
 from datetime import timedelta
 
 router = APIRouter()
@@ -10,7 +11,7 @@ router = APIRouter()
 # * POST /auth/login
 # *****************************************************************************
 @router.post("/auth/login", name="Authenticate User", tags=["authentication"])
-async def login(auth_request: AuthRequest):
+async def login(auth_request: AuthRequest, response: Response):
     '''Authenticate user and return JWT token'''
     user = queries.check_authentication(auth_request.username)
 
@@ -27,10 +28,37 @@ async def login(auth_request: AuthRequest):
             },
             expires_delta=timedelta(minutes=ACCESS_TOKEN_EXPIRE_MINUTES)
     )
+
+    # Create refresh token for user
+    refresh_token = create_refresh_token(
+        data={
+                "sub": user['username'],
+                "user_id": user["id"]
+            }
+    )
+
+    # Set cookies (HttpOnly)
+    response.set_cookie(
+        key="access_token",
+        value=access_token,
+        httponly=True,
+        secure=True,
+        samesite="lax",
+        max_age=ACCESS_TOKEN_EXPIRE_MINUTES * 60 * 60,
+        path="/"
+    )
+    response.set_cookie(
+        key="refresh_token",
+        value=refresh_token,
+        httponly=True,
+        secure=True,
+        samesite="lax",
+        max_age=24*60*60,
+        path="/"
+    )
+
     return {
         "status": "success",
-        "access_token": access_token,
-        "token_type": "bearer",
         "user": {
             "id": user['id'],
             "username": user['username']
@@ -57,18 +85,8 @@ async def register(auth_request: AuthRequest):
         user_id = queries.create_user(auth_request.username, hashed_password_in_db)
         new_user = queries.get_user_by_id(user_id)
 
-        # Create token for new user
-        access_token = create_access_token(
-        data={
-                "sub": new_user['username'],
-                "user_id": new_user["id"]
-            },
-            expires_delta=timedelta(minutes=ACCESS_TOKEN_EXPIRE_MINUTES)
-    )
         return {
             "status": "success",
-            "access_token": access_token,
-            "token_type": "bearer",
             "user": {
                 "id": new_user['id'],
                 "username": new_user['username']
@@ -76,4 +94,40 @@ async def register(auth_request: AuthRequest):
         }
     except Exception as error:
         raise HTTPException(status_code=500, detail=f"Failed to create user: {str(error)}")
+# *****************************************************************************
+
+# * GET /auth/me
+# *****************************************************************************
+@router.get("/auth/me")
+async def me(current_user = Depends(get_current_user)):
+    return{
+        "status":"success",
+        "user":"current_user"
+    }
+# *****************************************************************************
+
+# * POST /auth/refresh
+# *****************************************************************************
+@router.post("/auth/refresh")
+async def refresh_toket(response: Response, refresh_token: str = Cookie(None)):
+    if not refresh_token:
+        raise HTTPException(status_code=401, detail="No refresh token")
+    user = verify_refresh_token(refresh_token)
+    if not user:
+        raise HTTPException(status_code=401, detail="Invalid refresh token")
+    
+    access_token = create_access_token(data={
+                "sub": user['username'],
+                "user_id": user["id"]
+            },
+            expires_delta=timedelta(minutes=ACCESS_TOKEN_EXPIRE_MINUTES))
+    
+    response.set_cookie(
+        key="access_token", 
+        value=access_token, 
+        httponly=True, 
+        secure=True, 
+        samesite="lax", 
+        max_age=ACCESS_TOKEN_EXPIRE_MINUTES*60)
+    return {"status":"success"}
 # *****************************************************************************
