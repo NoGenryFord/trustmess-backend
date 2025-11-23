@@ -5,7 +5,7 @@ from src.secure.jwt_handler import verify_token
 security = HTTPBearer()
 
 def get_token_from_coockie(request: Request):
-    token = request.cookies.get("acces_token") or request.cookies.get("refresh_token")
+    token = request.cookies.get("access_token") or request.cookies.get("refresh_token")
     return token
 
 def get_current_user(credentials: HTTPAuthorizationCredentials = Security(security), request: Request = None):
@@ -23,3 +23,8 @@ def get_current_user(credentials: HTTPAuthorizationCredentials = Security(securi
         raise HTTPException(status_code=401, detail="Not authenticated")
     
     user = verify_token(token)
+    
+    if not user:
+        raise HTTPException(status_code=401, detail="Invalid token")
+    
+    return user

@@ -42,16 +42,16 @@ async def login(auth_request: AuthRequest, response: Response):
         key="access_token",
         value=access_token,
         httponly=True,
-        secure=True,
+        secure=True,  # ! False для HTTP, True для HTTPS in production
         samesite="lax",
-        max_age=ACCESS_TOKEN_EXPIRE_MINUTES * 60 * 60,
+        max_age=ACCESS_TOKEN_EXPIRE_MINUTES * 60,
         path="/"
     )
     response.set_cookie(
         key="refresh_token",
         value=refresh_token,
         httponly=True,
-        secure=True,
+        secure=True,  # ! False для HTTP, True для HTTPS in production
         samesite="lax",
         max_age=24*60*60,
         path="/"
@@ -64,6 +64,15 @@ async def login(auth_request: AuthRequest, response: Response):
             "username": user['username']
         }
     }
+# *****************************************************************************
+
+# * POST /auth/register
+# *****************************************************************************
+@router.post("/auth/logout")
+async def logout(response: Response):
+    response.delete_cookie(key="access_token", path="/")
+    response.delete_cookie(key="refresh_token", path="/")
+    return {"status":"success"}
 # *****************************************************************************
 
     
@@ -101,8 +110,8 @@ async def register(auth_request: AuthRequest):
 @router.get("/auth/me")
 async def me(current_user = Depends(get_current_user)):
     return{
-        "status":"success",
-        "user":"current_user"
+        "status": "success",
+        "user": current_user
     }
 # *****************************************************************************
 
@@ -126,7 +135,7 @@ async def refresh_toket(response: Response, refresh_token: str = Cookie(None)):
         key="access_token", 
         value=access_token, 
         httponly=True, 
-        secure=True, 
+        secure=False, # ! False для HTTP, True для HTTPS in production
         samesite="lax", 
         max_age=ACCESS_TOKEN_EXPIRE_MINUTES*60)
     return {"status":"success"}

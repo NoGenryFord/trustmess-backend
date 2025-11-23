@@ -8,13 +8,21 @@ from src.routes.websocket import router as websocket_router
 app = FastAPI(
     title='TrustMess API',
     description="Real-time messaging API with WebSocket support",
-    version='0.4.0'
+    version='1.1.0'
 )
 
 # ? CORS Middleware
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["*"],
+    allow_origins=[
+        "http://localhost:5173",
+        "http://localhost:4173", 
+        "http://127.0.0.1:5173",
+        "http://127.0.0.1:4173",
+        "http://192.168.1.43:5173",
+        "http://192.168.1.43:4173",
+        "https://trustmess.org"
+    ],
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
