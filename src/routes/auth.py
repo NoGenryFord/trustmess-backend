@@ -112,6 +112,19 @@ async def register(auth_request: AuthRequest):
 # *****************************************************************************
 
 
+# * POST /auth/delete_user
+# *****************************************************************************
+@router.post("/auth/delete_user", tags=["authentication"])
+async def delete_user(username: str):
+    deleted = queries.delete_user(username)
+    if not deleted:
+        raise HTTPException(status_code=404, detail="User not found")
+    return {"status": "succes", "messaga": "User deleted successfully"}
+
+
+# *****************************************************************************
+
+
 # * GET /auth/me
 # *****************************************************************************
 @router.get("/auth/me", tags=["authentication"])
@@ -146,15 +159,6 @@ async def refresh_toket(response: Response, refresh_token: str = Cookie(None)):
         max_age=ACCESS_TOKEN_EXPIRE_MINUTES * 60,
     )
     return {"status": "success"}
-
-
-# *****************************************************************************
-
-
-# * POST /auth/delete_acc
-# *****************************************************************************
-@router.post("/auth/delete_acc", tags=["authentication"])
-async def delete_acc(): ...
 
 
 # *****************************************************************************

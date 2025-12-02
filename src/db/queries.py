@@ -71,8 +71,11 @@ def create_user(username: str, hashed_password: str, isAdmin: bool = False):
 def delete_user(username: str):
     conn = get_connection()
     try:
-        with conn.cursor as cursor:
+        with conn.cursor() as cursor:
             cursor.execute("DELETE FROM users WHERE username = %s", (username,))
+            deleted = cursor.rowcount > 0
+            conn.commit()
+            return deleted
     except Exception as error:
         conn.rollback()
         raise
